@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <delete dir="/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-archives/target/test-dir"/>
+  <mkdir dir="/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-archives/target/test-dir"/>
+  <mkdir dir="/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-archives/target/log"/>
+</target>
+</project>

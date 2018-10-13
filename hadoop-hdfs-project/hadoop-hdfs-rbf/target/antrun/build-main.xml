@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main" if="tar">
+  <echo file="/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-hdfs-project/hadoop-hdfs-rbf/target/dist-maketar.sh">cd &quot;/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-hdfs-project/hadoop-hdfs-rbf/target&quot;
+                      tar cf - hadoop-hdfs-rbf-2.9.1 | gzip &gt; hadoop-hdfs-rbf-2.9.1.tar.gz</echo>
+  <exec failonerror="true" dir="/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-hdfs-project/hadoop-hdfs-rbf/target" executable="bash">
+    <arg line="./dist-maketar.sh"/>
+  </exec>
+</target>
+</project>
