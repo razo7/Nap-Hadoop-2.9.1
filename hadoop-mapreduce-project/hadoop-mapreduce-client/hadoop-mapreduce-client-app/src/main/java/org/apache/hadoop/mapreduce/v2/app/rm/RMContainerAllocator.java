@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.IntStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,7 +96,7 @@ import com.google.common.annotations.VisibleForTesting;
 public class RMContainerAllocator extends RMContainerRequestor
     implements ContainerAllocator {
 
-  static final Log LOG = LogFactory.getLog(RMContainerAllocator.class);
+  static final Log outputAssignContainers+=LOG = LogFactory.getLog(RMContainerAllocator.class);
   
   public static final 
   float DEFAULT_COMPLETED_MAPS_PERCENT_FOR_REDUCE_SLOWSTART = 0.05f;
@@ -115,7 +116,7 @@ public class RMContainerAllocator extends RMContainerRequestor
   static {
     PRIORITY_FAST_FAIL_MAP = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
     PRIORITY_FAST_FAIL_MAP.setPriority(5);
-    PRIORITY_REDUCE = RecordFactoryProvider.getRecordFtory(null).newRecordInstance(Priority.class);
+    PRIORITY_REDUCE = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
     PRIORITY_REDUCE.setPriority(10);
     PRIORITY_MAP = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
     PRIORITY_MAP.setPriority(20);
@@ -1178,7 +1179,7 @@ public class RMContainerAllocator extends RMContainerRequestor
                 + " container memory less than required " + reduceResourceRequest
                 + " or no pending reduce tasks.");
             isAssignable = false;
-          } else
+          } else {
             reducePending--;
           }
         } else {
@@ -1290,21 +1291,42 @@ public class RMContainerAllocator extends RMContainerRequestor
 
   private void assignContainers(List<Container> allocatedContainers) {
     Iterator<Container> it = allocatedContainers.iterator();
-    LOG.info("OR_Change-assignContainers\nNumber of containers: " + allocatedContainers.size() +
-            "\nNumber of mappers " + maps.size() +
-            "\nNumber of reducers " + reduces.size());//OR_Change
-    while (it.hasNext()) {
+    String outputAssignContainers = "";//OR_Change
+    outputAssignContainers+="OR_Change-assignContainers\nBefore\nNumber of containers: "
+            + allocatedContainers.size() +
+              ", Number of mappers " + assignedRequests.maps.size() +
+              ", Number of reducers " + assignedRequests.reduces.size();//OR_Change
+      while (it.hasNext()) {
       Container allocated = it.next();
-      LOG.info( "OR_Change-assignContainers\nContainer " + allocated.getId().toString() + " is allocated on Node  "+
-              allocated.getNodeId().getHost());//OR_Change
       ContainerRequest assigned = assignWithoutLocality(allocated);
       if (assigned != null) {
         containerAssigned(allocated, assigned);
         it.remove();
       }
     }
-
     assignMapsWithLocality(allocatedContainers);
+
+    LinkedHashMap<TaskAttemptId, Container>  contAllocMap =  assignedRequests.maps;//OR_Change
+    LinkedHashMap<TaskAttemptId, Container>  contAllocRed =  assignedRequests.reduces;//OR_Change
+      outputAssignContainers+="\nAfter\nNumber of containers: " + allocatedContainers.size() +
+              ", Number of mappers " + contAllocMap.size() +
+              ", Number of reducers " + contAllocRed.size() +"\nMappers:";//OR_Change
+    for (int i = 0; i < contAllocMap.size(); i++)//OR_Change
+    {//OR_Change
+        outputAssignContainers+="\n"+contAllocMap.get(i)+ " to task " +
+                contAllocMap.keySet().iterator().next() + " on node "
+                +contAllocMap.get(i).getNodeId().getHost();//OR_Change
+    }//OR_Change
+    outputAssignContainers+= "\nReducers";//OR_Change
+    for (int i = 0; i < contAllocRed.size(); i++)//OR_Change
+      {//OR_Change
+          outputAssignContainers+="\n"+contAllocRed.get(i)+ " to task " +
+                  contAllocRed.keySet().iterator().next() + " on node "
+                  +contAllocRed.get(i).getNodeId().getHost();//OR_Change
+      }//OR_Change
+      LOG.info(outputAssignContainers);//OR_Change
+
+
   }
 
     
