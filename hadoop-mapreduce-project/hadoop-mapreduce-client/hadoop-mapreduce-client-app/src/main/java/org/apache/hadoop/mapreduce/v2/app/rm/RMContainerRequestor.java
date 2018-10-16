@@ -194,30 +194,40 @@ public abstract class RMContainerRequestor extends RMCommunicator {
   }
 
   protected AllocateResponse makeRemoteRequest() throws YarnException,
-      IOException {
+          IOException {
     applyRequestLimits();
     ResourceBlacklistRequest blacklistRequest =
-        ResourceBlacklistRequest.newInstance(new ArrayList<String>(blacklistAdditions),
-            new ArrayList<String>(blacklistRemovals));
+            ResourceBlacklistRequest.newInstance(new ArrayList<String>(blacklistAdditions),
+                    new ArrayList<String>(blacklistRemovals));
     AllocateRequest allocateRequest =
-        AllocateRequest.newInstance(lastResponseID,
-          super.getApplicationProgress(), new ArrayList<ResourceRequest>(ask),
-          new ArrayList<ContainerId>(release), blacklistRequest);
+            AllocateRequest.newInstance(lastResponseID,
+                    super.getApplicationProgress(), new ArrayList<ResourceRequest>(ask),
+                    new ArrayList<ContainerId>(release), blacklistRequest);
     AllocateResponse allocateResponse = scheduler.allocate(allocateRequest);
+    Iterator<Container> it = allocateResponse.getAllocatedContainers().iterator();//OR_Change
+    LOG.info("OR_Change-makeRemoteRequest\nNumber of containers: " + allocatedContainers.size() +
+            "\nNumber of mappers " + maps.size() +
+            "\nNumber of reducers " + reduces.size());//OR_Change
+    while (it.hasNext()) { //OR_Change
+      Container allocated = it.next();//OR_Change
+      LOG.info( "OR_Change-makeRemoteRequest\nContainer " +
+              allocated.getId().toString() + " is allocated on Node  "+
+              allocated.getNodeId().getHost());//OR_Change
+    }//OR_Change
     lastResponseID = allocateResponse.getResponseId();
     availableResources = allocateResponse.getAvailableResources();
     lastClusterNmCount = clusterNmCount;
     clusterNmCount = allocateResponse.getNumClusterNodes();
     int numCompletedContainers =
-        allocateResponse.getCompletedContainersStatuses().size();
+            allocateResponse.getCompletedContainersStatuses().size();
 
     if (ask.size() > 0 || release.size() > 0) {
       LOG.info("getResources() for " + applicationId + ":" + " ask="
-          + ask.size() + " release= " + release.size() + " newContainers="
-          + allocateResponse.getAllocatedContainers().size()
-          + " finishedContainers=" + numCompletedContainers
-          + " resourcelimit=" + availableResources + " knownNMs="
-          + clusterNmCount);
+              + ask.size() + " release= " + release.size() + " newContainers="
+              + allocateResponse.getAllocatedContainers().size()
+              + " finishedContainers=" + numCompletedContainers
+              + " resourcelimit=" + availableResources + " knownNMs="
+              + clusterNmCount);
     }
 
     ask.clear();
@@ -231,8 +241,8 @@ public abstract class RMContainerRequestor extends RMCommunicator {
 
     if (blacklistAdditions.size() > 0 || blacklistRemovals.size() > 0) {
       LOG.info("Update the blacklist for " + applicationId +
-          ": blacklistAdditions=" + blacklistAdditions.size() +
-          " blacklistRemovals=" +  blacklistRemovals.size());
+              ": blacklistAdditions=" + blacklistAdditions.size() +
+              " blacklistRemovals=" +  blacklistRemovals.size());
     }
     blacklistAdditions.clear();
     blacklistRemovals.clear();

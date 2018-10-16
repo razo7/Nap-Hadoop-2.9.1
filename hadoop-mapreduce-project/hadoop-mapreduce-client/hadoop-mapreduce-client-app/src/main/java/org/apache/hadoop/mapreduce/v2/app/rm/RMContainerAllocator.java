@@ -115,7 +115,7 @@ public class RMContainerAllocator extends RMContainerRequestor
   static {
     PRIORITY_FAST_FAIL_MAP = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
     PRIORITY_FAST_FAIL_MAP.setPriority(5);
-    PRIORITY_REDUCE = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
+    PRIORITY_REDUCE = RecordFactoryProvider.getRecordFtory(null).newRecordInstance(Priority.class);
     PRIORITY_REDUCE.setPriority(10);
     PRIORITY_MAP = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Priority.class);
     PRIORITY_MAP.setPriority(20);
@@ -1178,7 +1178,7 @@ public class RMContainerAllocator extends RMContainerRequestor
                 + " container memory less than required " + reduceResourceRequest
                 + " or no pending reduce tasks.");
             isAssignable = false;
-          } else {
+          } else
             reducePending--;
           }
         } else {
@@ -1287,20 +1287,26 @@ public class RMContainerAllocator extends RMContainerRequestor
         
       return assigned;
     }
-        
-    private void assignContainers(List<Container> allocatedContainers) {
-      Iterator<Container> it = allocatedContainers.iterator();
-      while (it.hasNext()) {
-        Container allocated = it.next();
-        ContainerRequest assigned = assignWithoutLocality(allocated);
-        if (assigned != null) {
-          containerAssigned(allocated, assigned);
-          it.remove();
-        }
-      }
 
-      assignMapsWithLocality(allocatedContainers);
+  private void assignContainers(List<Container> allocatedContainers) {
+    Iterator<Container> it = allocatedContainers.iterator();
+    LOG.info("OR_Change-assignContainers\nNumber of containers: " + allocatedContainers.size() +
+            "\nNumber of mappers " + maps.size() +
+            "\nNumber of reducers " + reduces.size());//OR_Change
+    while (it.hasNext()) {
+      Container allocated = it.next();
+      LOG.info( "OR_Change-assignContainers\nContainer " + allocated.getId().toString() + " is allocated on Node  "+
+              allocated.getNodeId().getHost());//OR_Change
+      ContainerRequest assigned = assignWithoutLocality(allocated);
+      if (assigned != null) {
+        containerAssigned(allocated, assigned);
+        it.remove();
+      }
     }
+
+    assignMapsWithLocality(allocatedContainers);
+  }
+
     
     private ContainerRequest getContainerReqToReplace(Container allocated) {
       LOG.info("Finding containerReq for allocated container: " + allocated);
