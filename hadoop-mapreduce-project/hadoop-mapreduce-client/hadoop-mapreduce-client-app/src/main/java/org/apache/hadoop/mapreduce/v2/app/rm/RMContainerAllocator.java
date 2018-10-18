@@ -89,6 +89,11 @@ import org.apache.hadoop.yarn.util.RackResolver;
 import org.apache.hadoop.yarn.util.resource.Resources;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.hadoop.fs.FileSystem;//OR_Change
+import org.apache.hadoop.fs.Path;//OR_Change
+import java.net.URI;//OR_Change
+import org.apache.hadoop.fs.FSDataOutputStream;//OR_Change
+//import static org.apache.hadoop.fi.FiConfig.getConfig;//OR_Change
 
 /**
  * Allocates the container from the ResourceManager scheduler.
@@ -96,7 +101,7 @@ import com.google.common.annotations.VisibleForTesting;
 public class RMContainerAllocator extends RMContainerRequestor
     implements ContainerAllocator {
 
-  static final Log outputAssignContainers+=LOG = LogFactory.getLog(RMContainerAllocator.class);
+  static final Log LOG = LogFactory.getLog(RMContainerAllocator.class);
   
   public static final 
   float DEFAULT_COMPLETED_MAPS_PERCENT_FOR_REDUCE_SLOWSTART = 0.05f;
@@ -181,6 +186,7 @@ public class RMContainerAllocator extends RMContainerRequestor
   private long retrystartTime;
   private Clock clock;
 
+  private boolean flagReducersHDFS = true;//OR_Change
   @VisibleForTesting
   protected BlockingQueue<ContainerAllocatorEvent> eventQueue
     = new LinkedBlockingQueue<ContainerAllocatorEvent>();
@@ -306,8 +312,36 @@ public class RMContainerAllocator extends RMContainerRequestor
 
       recalculateReduceSchedule = false;
     }
+    //Write to HDFS the reducers locataion
+      if (flagReducersHDFS && pendingReduces.size() == 0 && scheduledRequests.reduces.size() == 0)//OR_Change
+      {
+          String outputAssignReducers = "";
+          LinkedHashMap<TaskAttemptId, Container>  contAllocRed =  assignedRequests.reduces;//OR_Change
+          int i =0;
+          for (Map.Entry<TaskAttemptId, Container> entry : contAllocRed.entrySet())//OR_Change
+          {//OR_Change
+              if (i == contAllocRed.size() -1)
+                   outputAssignReducers += entry.getValue().getNodeId().getHost();//OR_Change
+              else
+                   outputAssignReducers += entry.getValue().getNodeId().getHost() + " ";//OR_Change
+              i++;
+          }//OR_Change
+
+          Configuration conf = getConfig();//OR_Change
+          conf.set("bw_RM",outputAssignReducers);//OR_Change
+          //use HDFS "Downlinks","downlinks",""
+          FileSystem fs = FileSystem.get(URI.create("hdfs://master:9000"), conf);
+          Path hdfsPath = new Path("/user/hadoop2/");
+          Path hdfsFile = new Path(hdfsPath + "/" + "HDFS_fileFromHeartbeat");
+          FSDataOutputStream outputStream=fs.create(hdfsFile); //Classical output stream usage
+          outputStream.writeBytes(outputAssignReducers);
+          outputStream.close();
+          LOG.info("OR_Change-heartbeat\nReducers locations: " + outputAssignReducers);//OR_Change
+          flagReducersHDFS = false;//OR_Change
+      }
 
     scheduleStats.updateAndLogIfChanged("After Scheduling: ");
+
   }
 
   @Override
@@ -1267,34 +1301,30 @@ public class RMContainerAllocator extends RMContainerRequestor
     }
     
     private void containerNotAssigned(Container allocated) {
-      containersReleased++;
-      pendingRelease.add(allocated.getId());
-      release(allocated.getId());      
+        containersReleased++;
+        pendingRelease.add(allocated.getId());
+        release(allocated.getId());
     }
-    
-    private ContainerRequest assignWithoutLocality(Container allocated) {
-      ContainerRequest assigned = null;
-      
-      Priority priority = allocated.getPriority();
-      if (PRIORITY_FAST_FAIL_MAP.equals(priority)) {
-        LOG.info("Assigning container " + allocated + " to fast fail map");
-        assigned = assignToFailedMap(allocated);
-      } else if (PRIORITY_REDUCE.equals(priority)) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Assigning container " + allocated + " to reduce");
-        }
-        assigned = assignToReduce(allocated);
-      }
-        
-      return assigned;
-    }
+      private ContainerRequest assignWithoutLocality(Container allocated) {
+          ContainerRequest assigned = null;
 
+          Priority priority = allocated.getPriority();
+          if (PRIORITY_FAST_FAIL_MAP.equals(priority)) {
+              LOG.info("Assigning container " + allocated + " to fast fail map");
+              assigned = assignToFailedMap(allocated);
+          } else if (PRIORITY_REDUCE.equals(priority)) {
+              if (LOG.isDebugEnabled()) {
+                  LOG.debug("Assigning container " + allocated + " to reduce");
+              }
+              assigned = assignToReduce(allocated);
+          }
+
+          return assigned;
+      }
   private void assignContainers(List<Container> allocatedContainers) {
     Iterator<Container> it = allocatedContainers.iterator();
-    String outputAssignContainers = "";//OR_Change
-    outputAssignContainers+="OR_Change-assignContainers\nBefore\nNumber of containers: "
-            + allocatedContainers.size() +
-              ", Number of mappers " + assignedRequests.maps.size() +
+    String outputAssignContainers = "OR_Change-assignContainers\nBefore- Number of containers: "
+            + allocatedContainers.size() + ", Number of mappers " + assignedRequests.maps.size() +
               ", Number of reducers " + assignedRequests.reduces.size();//OR_Change
       while (it.hasNext()) {
       Container allocated = it.next();
@@ -1308,25 +1338,23 @@ public class RMContainerAllocator extends RMContainerRequestor
 
     LinkedHashMap<TaskAttemptId, Container>  contAllocMap =  assignedRequests.maps;//OR_Change
     LinkedHashMap<TaskAttemptId, Container>  contAllocRed =  assignedRequests.reduces;//OR_Change
-      outputAssignContainers+="\nAfter\nNumber of containers: " + allocatedContainers.size() +
+    outputAssignContainers += "\nAfter- Number of containers: " + allocatedContainers.size() +
               ", Number of mappers " + contAllocMap.size() +
               ", Number of reducers " + contAllocRed.size() +"\nMappers:";//OR_Change
-    for (int i = 0; i < contAllocMap.size(); i++)//OR_Change
+    for (Map.Entry<TaskAttemptId, Container> entry : contAllocMap.entrySet())//OR_Change
     {//OR_Change
-        outputAssignContainers+="\n"+contAllocMap.get(i)+ " to task " +
-                contAllocMap.keySet().iterator().next() + " on node "
-                +contAllocMap.get(i).getNodeId().getHost();//OR_Change
+        outputAssignContainers += "\n" + entry.getValue().getId().toString() + " to task " +
+                entry.getKey() + " on node " +
+                entry.getValue().getNodeId().getHost();//OR_Change
     }//OR_Change
-    outputAssignContainers+= "\nReducers";//OR_Change
-    for (int i = 0; i < contAllocRed.size(); i++)//OR_Change
+    outputAssignContainers += "\nReducers:";//OR_Change
+    for (Map.Entry<TaskAttemptId, Container> entry : contAllocRed.entrySet())//OR_Change
       {//OR_Change
-          outputAssignContainers+="\n"+contAllocRed.get(i)+ " to task " +
-                  contAllocRed.keySet().iterator().next() + " on node "
-                  +contAllocRed.get(i).getNodeId().getHost();//OR_Change
+        outputAssignContainers += "\n"+entry.getValue().getId().toString() + " to task " +
+                  entry.getKey() + " on node " +
+                  entry.getValue().getNodeId().getHost();//OR_Change
       }//OR_Change
       LOG.info(outputAssignContainers);//OR_Change
-
-
   }
 
     
@@ -1639,3 +1667,4 @@ public class RMContainerAllocator extends RMContainerRequestor
     }
   }
 }
+

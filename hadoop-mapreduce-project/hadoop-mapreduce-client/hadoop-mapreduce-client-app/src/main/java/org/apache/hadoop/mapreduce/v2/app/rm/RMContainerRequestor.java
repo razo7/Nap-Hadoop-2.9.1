@@ -52,7 +52,6 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.exceptions.YarnRuntimeException;
 import org.apache.hadoop.yarn.factories.RecordFactory;
 import org.apache.hadoop.yarn.factory.providers.RecordFactoryProvider;
-import org.apache.hadoop.yarn.api.records.Container; //OR_Change
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.yarn.util.resource.Resources;
 
@@ -204,16 +203,6 @@ public abstract class RMContainerRequestor extends RMCommunicator {
                     super.getApplicationProgress(), new ArrayList<ResourceRequest>(ask),
                     new ArrayList<ContainerId>(release), blacklistRequest);
     AllocateResponse allocateResponse = scheduler.allocate(allocateRequest);
-   /*
-    Iterator<Container> it = allocateResponse.getAllocatedContainers().iterator();//OR_Change
-
-    while (it.hasNext()) { //OR_Change
-      Container allocated = it.next();//OR_Change
-      LOG.info( "OR_Change-makeRemoteRequest\nContainer " +
-              allocated.getId().toString() + " is allocated on Node  "+
-              allocated.getNodeId().getHost());//OR_Change
-    }//OR_Change
-     */
     lastResponseID = allocateResponse.getResponseId();
     availableResources = allocateResponse.getAvailableResources();
     lastClusterNmCount = clusterNmCount;
