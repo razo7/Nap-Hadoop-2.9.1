@@ -329,13 +329,12 @@ public class RMContainerAllocator extends RMContainerRequestor
 
           Configuration conf = getConfig();//OR_Change
           conf.set("bw_RM",outputAssignReducers);//OR_Change
-          //use HDFS "Downlinks","downlinks",""
-          FileSystem fs = FileSystem.get(URI.create("hdfs://master:9000"), conf);
-          Path hdfsPath = new Path("/user/hadoop2/");
-          Path hdfsFile = new Path(hdfsPath + "/" + "HDFS_fileFromHeartbeat");
-          FSDataOutputStream outputStream=fs.create(hdfsFile); //Classical output stream usage
-          outputStream.writeBytes(outputAssignReducers);
-          outputStream.close();
+          FileSystem fs = FileSystem.get(URI.create("hdfs://master:9000"), conf);//OR_Change
+          Path hdfsPath = new Path("/user/hadoop2/");//OR_Change
+          Path hdfsFile = new Path(hdfsPath + "/" + "HDFS_fileFromHeartbeat");//OR_Change
+          FSDataOutputStream outputStream=fs.create(hdfsFile);//OR_Change - Classical output stream usage
+          outputStream.writeBytes(outputAssignReducers);//OR_Change
+          outputStream.close();//OR_Change
           LOG.info("OR_Change-heartbeat\nReducers locations: " + outputAssignReducers);//OR_Change
           flagReducersHDFS = false;//OR_Change
       }
