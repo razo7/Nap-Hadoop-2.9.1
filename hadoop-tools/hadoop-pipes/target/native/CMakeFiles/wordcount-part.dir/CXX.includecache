@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/examples/impl/wordcount-part.cc
+hadoop/Pipes.hh
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/examples/impl/hadoop/Pipes.hh
+hadoop/TemplateFactory.hh
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/examples/impl/hadoop/TemplateFactory.hh
+hadoop/StringUtils.hh
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/examples/impl/hadoop/StringUtils.hh
+
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/pipes/api/hadoop/Pipes.hh
+string
+-
+stdint.h
+-
+
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/pipes/api/hadoop/TemplateFactory.hh
+
+/home/hadoop2/intelliji_workspace/hadoop-2.9.1-src/hadoop-tools/hadoop-pipes/src/main/native/utils/api/hadoop/StringUtils.hh
+stdint.h
+-
+string
+-
+vector
+-
+

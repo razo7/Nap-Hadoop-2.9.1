@@ -1,0 +1,1 @@
+/usr/bin/cc   -g -O2 -Wall -pthread  -D_GNU_SOURCE    CMakeFiles/container-executor.dir/main/native/container-executor/impl/main.c.o  -o target/usr/local/bin/container-executor -rdynamic libcontainer.a 
