@@ -312,33 +312,51 @@ public class RMContainerAllocator extends RMContainerRequestor
 
       recalculateReduceSchedule = false;
     }
-    //Write to HDFS the reducers locataion
-      if (flagReducersHDFS && pendingReduces.size() == 0 && scheduledRequests.reduces.size() == 0)//OR_Change
+    //Write to HDFS the mappers and reducers (containers) locataion - START - OR_Change
+      if (flagReducersHDFS && pendingReduces.size() == 0 && scheduledRequests.reduces.size() == 0)
       {
+          //Mappers
+          int i = 0;
+          String outputAssignMappers = "";
+          LinkedHashMap<TaskAttemptId, Container>  contAllocMap =  assignedRequests.maps;
+          for (Map.Entry<TaskAttemptId, Container> entry : contAllocMap.entrySet())
+          {
+            if (i == contAllocMap.size() -1)
+              outputAssignMappers += entry.getValue().getNodeId().getHost();
+            else
+              outputAssignMappers += entry.getValue().getNodeId().getHost() + " ";
+            i++;
+          }
+          //Reducers
           String outputAssignReducers = "";
-          LinkedHashMap<TaskAttemptId, Container>  contAllocRed =  assignedRequests.reduces;//OR_Change
-          int i =0;
-          for (Map.Entry<TaskAttemptId, Container> entry : contAllocRed.entrySet())//OR_Change
-          {//OR_Change
+          LinkedHashMap<TaskAttemptId, Container>  contAllocRed =  assignedRequests.reduces;
+          i = 0;
+          for (Map.Entry<TaskAttemptId, Container> entry : contAllocRed.entrySet())
+          {
               if (i == contAllocRed.size() -1)
-                   outputAssignReducers += entry.getValue().getNodeId().getHost();//OR_Change
+                   outputAssignReducers += entry.getValue().getNodeId().getHost();
               else
-                   outputAssignReducers += entry.getValue().getNodeId().getHost() + " ";//OR_Change
+                   outputAssignReducers += entry.getValue().getNodeId().getHost() + " ";
               i++;
-          }//OR_Change
+          }
+          //create a conncection with Namenode (HDFS)
+          Configuration conf = getConfig();
+          FileSystem fs = FileSystem.get(URI.create("hdfs://master:9000"), conf);
+          // Write mappersLocations and reducersLocations files
+          Path hdfsFileMappers = new Path("/" + "mappersLocations");
+          FSDataOutputStream outputStreamMappers = fs.create(hdfsFileMappers);//Classical output stream usage
+          outputStreamMappers.writeBytes(outputAssignMappers);
+          outputStreamMappers.close();//mappers file
 
-          Configuration conf = getConfig();//OR_Change
-          conf.set("bw_RM",outputAssignReducers);//OR_Change
-          FileSystem fs = FileSystem.get(URI.create("hdfs://master:9000"), conf);//OR_Change
-          Path hdfsPath = new Path("/user/hadoop2/");//OR_Change
-          Path hdfsFile = new Path(hdfsPath + "/" + "HDFS_fileFromHeartbeat");//OR_Change
-          FSDataOutputStream outputStream=fs.create(hdfsFile);//OR_Change - Classical output stream usage
-          outputStream.writeBytes(outputAssignReducers);//OR_Change
-          outputStream.close();//OR_Change
-          LOG.info("OR_Change-heartbeat\nReducers locations: " + outputAssignReducers);//OR_Change
-          flagReducersHDFS = false;//OR_Change
+          Path hdfsFileReducers = new Path("/" + "reducersLocations");
+          FSDataOutputStream outputStreamReducers = fs.create(hdfsFileReducers);//Classical output stream usage
+          outputStreamReducers.writeBytes(outputAssignReducers);
+          outputStreamReducers.close();//reducers file
+          LOG.info("OR_Change-heartbeat\nMappers locations: " + outputAssignMappers +
+                  "\nReducers locations: " + outputAssignReducers);
+          flagReducersHDFS = false;
       }
-
+    //Write to HDFS the mappers and reducers (containers) locataion - END - OR_Change
     scheduleStats.updateAndLogIfChanged("After Scheduling: ");
 
   }
