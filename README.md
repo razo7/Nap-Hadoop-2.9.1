@@ -31,6 +31,9 @@ All of the above changes can be easily found before **"OR_Change"** comment at e
 ### Compilation 
 1. Download Hadoop source code from [@here](https://hadoop.apache.org/releases.html) or clone this project.
 2. Make the changes in the desired java files, i.e., _RMContainerAllocator.java_.
+
+** Read the build instructions for Hadoop from BUILDING.txt (in the parent directory).
+
 3. Install cmake, Google protocol buffers (Proto buf 2.5), and Maven (for compiling).
 4. Run one of the following codes under the hadoop-project directory (Nap-Hadoop-2.9.1/hadoop-project/):
 
@@ -41,7 +44,3 @@ mvn package -Pdist,native -DskipTests -Dtar
 
 ## Contact
 Created by Or Raz (razo7) as part of my master's thesis work and my [@article](IEEE.com) - feel free to contact me on Linkedin [@Or Raz](https://www.linkedin.com/in/or-raz/) or [@Email](razo@post.bgu.ac.il)!
-
-Examples of use
-Sources
-
