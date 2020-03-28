@@ -43,4 +43,4 @@ mvn package -Pdist,native -DskipTests -Dtar
 ```
 
 ## Contact
-Created by Or Raz (razo7) as part of my master's thesis work and my [article](https://ieeexplore.ieee.org/abstract/document/8935013) - feel free to contact me on Linkedin [Or Raz](https://www.linkedin.com/in/or-raz/) or email (razo@post.bgu.ac.il)!
+Created by Or Raz (razo7) as part of his master's thesis work and it was partly published in the following [article](https://ieeexplore.ieee.org/abstract/document/8935013) of NCA 19 (IEEE) - feel free to contact on [Linkedin](https://www.linkedin.com/in/or-raz/) or email (razo@post.bgu.ac.il)!
