@@ -1,6 +1,6 @@
 # Nap-Hadoop-2.9.1
 
-Network-Aware, modified, version of Hadoop 2.9.1 used for Nap (see more [@here](https://github.com/razo7/Nap)).
+Network-Aware, modified, version of Hadoop 2.9.1 used for Nap project (see more [here](https://github.com/razo7/Nap)).
 
 ## Table of contents
 * [Motivation](#Introduction)
@@ -10,9 +10,9 @@ Network-Aware, modified, version of Hadoop 2.9.1 used for Nap (see more [@here](
 
 
 ## Motivation
-Write the map and reduce __containers locations__ (the node for each container/task) to HDFS and LOG.
+Create a network aware version of Hadoop. For that we write the map and reduce __containers locations__ (the node for each container/task) to HDFS and LOG, then we can read these locations from HDFS for our network aware modification (Nap).
 
-The modification is writing these locations in Hadoop LOG, and under "/mappersLocations" or "/reducersLocations" directory respectively, when the NameNode computer has to be "called" (has an hostname) _master_.
+This modification results in writing these locations in Hadoop LOG, and under "/mappersLocations" or "/reducersLocations" directory respectively (HDFS), when the NameNode computer has to be "called" (has an hostname) _master_.
  
 ## Technologies
 * Hadoop 2.9.1
@@ -29,7 +29,7 @@ In addition, write to LOG every heartbeat the status of the mappers and reducers
 
 All of the above changes can be easily found before **"OR_Change"** comment at each line.
 ### Compilation 
-1. Download Hadoop source code from [@here](https://hadoop.apache.org/releases.html) or clone this project.
+1. Download Hadoop source code from [here](https://hadoop.apache.org/releases.html) or clone this project.
 2. Make the changes in the desired java files, i.e., _RMContainerAllocator.java_.
 
 ** Read the build instructions for Hadoop from BUILDING.txt (in the parent directory).
@@ -43,4 +43,4 @@ mvn package -Pdist,native -DskipTests -Dtar
 ```
 
 ## Contact
-Created by Or Raz (razo7) as part of my master's thesis work and my [@article](IEEE.com) - feel free to contact me on Linkedin [@Or Raz](https://www.linkedin.com/in/or-raz/) or [@Email](razo@post.bgu.ac.il)!
+Created by Or Raz (razo7) as part of my master's thesis work and my [article](https://ieeexplore.ieee.org/abstract/document/8935013) - feel free to contact me on Linkedin [Or Raz](https://www.linkedin.com/in/or-raz/) or email (razo@post.bgu.ac.il)!
